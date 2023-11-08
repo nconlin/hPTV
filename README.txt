@@ -1,4 +1,4 @@
-FOLDER CONTAINING CODES TO DO PTV
+FOLDER CONTAINING CODES TO DO PTV AND SIMPLE ANALYSIS
 
 this folder containes the codes necessary to do background subtraction, particle finding, 2D particle tracking, and center to ray conversion.
 Following ray generation the c++ implementation of STM matching can be ran.
