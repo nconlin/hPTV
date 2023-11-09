@@ -14,17 +14,22 @@ for ii = 1:nframes
 
     % read in data for this frame
     dataPath = ['/frame' num2str(frames(ii)) '_xyze'];
-    data = h5read(file,dataPath);
+    try
+        data = h5read(file,dataPath);
+        
+        % append x,y,z positions
+        X = [X; data(:,1:3)];
     
-    % append x,y,z positions
-    X = [X; data(:,1:3)];
-
-    % append error
-    E = [E; data(:,4)];
-
-    % set the time as the same for each particle this frame
-    nParts = size(data,1);
-    t = frames(ii)*ones(nParts,1);
-    T = [T; t];
+        % append error
+        E = [E; data(:,4)];
+    
+        % set the time as the same for each particle this frame
+        nParts = size(data,1);
+        t = frames(ii)*ones(nParts,1);
+        T = [T; t];
+    catch
+        warning(['read failed at frame ' num2str(frames(ii))])
+        return
+    end
 end
 
