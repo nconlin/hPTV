@@ -10,6 +10,9 @@ matches = vertcat(tracks.part_ids); % particle ids
 
 %% estimate the 2D position uncertainty (reprojection)
 
+% waitbar for progress report
+disp('Reprojecting on Camera');
+
 % disparity vector
 d = NaN(size(X,1),2,4);
 
@@ -35,7 +38,6 @@ for ii = 1:size(X,1)
             d(ii,:,cam) = Xc_cam - Xc_proj;
 
         end
-          
     end
 end
 
@@ -46,6 +48,9 @@ Sigma_d = diag(d_var(:));
 
 
 %% solve for the world coordinate uncertainty
+
+% report progress
+disp('Solving for 3D uncertainty')
 
 % sum up the reprojection and detection error
 Sigma_X = Sigma_d;% + Sigma_det;
@@ -83,6 +88,7 @@ end
 wrld_std = sqrt(diag(nanmedian(Sigma_wrld,3)))
 
 if plotResults
+    disp('Plotting results')
     %% plot the results
     f = figure;
     f.Units = 'inches';
