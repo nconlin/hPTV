@@ -4,6 +4,8 @@ function stats = lagrangian_analysis(tracks,h,widths)
 % prune tracks
 minTrackLen = 30;
 minLenSeg = 10;
+minPDFsamps = 100;
+nBoot = 100;
 disp(['throwing out tracks shorter than ' num2str(minTrackLen) ' frames'])
 tracks = tracks( vertcat(tracks.len) > minTrackLen);
 
@@ -74,6 +76,7 @@ for ii = 1:length(h)
     Rstd = NaN(3,maxLen);
     S = NaN(3,maxLen);
     F = NaN(3,maxLen);
+    F_ci = NaN(3,maxLen,2);
     sigma = NaN(3,3,maxLen);
     Sstd = NaN(3,maxLen);
     Spdf = cell(3,maxLen);
@@ -81,6 +84,7 @@ for ii = 1:length(h)
     dXpdf = cell(3,maxLen);
     dXbins = cell(3,maxLen);
     dXstd = NaN(3,maxLen);
+    dX2 = NaN(3,maxLen);
     t = 1:maxLen;
     nOrder = 2;
     nSamps = NaN(maxLen,1);
@@ -99,28 +103,36 @@ for ii = 1:length(h)
         % structure function
         du = up(:,shift,:) - up(:,current,:);
         dXt = dXp(:,shift,:) - dXp(:,current,:);
+        dX2(:,jj) = mean( dXt.^2,[2 3],'omitnan');
         S(:,jj) = mean( du.^nOrder , [2 3], 'omitnan');
        % sigma(:,:,jj) = mean( du*du',[3 2],'omitnan');
         Sstd(:,jj) = std( du.^nOrder ,0, [2 3], 'omitnan');
         F(:,jj) = mean( du.^4,[2 3],'omitnan')./S(:,jj).^2;
 
         % pdf of velocity increments
-        for kk = 1:3
-            ducomp = squeeze(squeeze(du(kk,:,:)));
-            [Spdf{kk,jj},Sbins{kk,jj}] = histcounts(ducomp(~isnan(ducomp)),'Normalization','pdf');
-            Sstd(kk,jj) = std(ducomp(~isnan(ducomp)));
+        if nSamps(jj) > minPDFsamps % then do pdfs, not worth it otherwise
+            if jj == 100
+                stop = 1;
+            end
+            for kk = 1:3
+                ducomp = squeeze(squeeze(du(kk,:,:)));
+                [Spdf{kk,jj},Sbins{kk,jj}] = histcounts(ducomp(~isnan(ducomp)),'Normalization','pdf');
+                %[Spdf{kk,jj},Sbins{kk,jj}] = ksdensity(ducomp(~isnan(ducomp)));
+                Sstd(kk,jj) = std(ducomp(~isnan(ducomp)));
+                F_ci(kk,jj,1:2) = bootci(nBoot,@kurtosis,ducomp(~isnan(ducomp)));
+            end
+    
+            % pdf of displacements
+            for kk = 1:3
+                dXcomp = squeeze(squeeze(dXt(kk,:,:)));
+                [dXpdf{kk,jj},dXbins{kk,jj}] = histcounts(ducomp(~isnan(dXcomp)),'Normalization','pdf');
+                dXstd(kk,jj) = std(ducomp(~isnan(dXcomp)));
+            end
         end
-
-        % pdf of displacements
-        for kk = 1:3
-            dXcomp = squeeze(squeeze(dXt(kk,:,:)));
-            [dXpdf{kk,jj},dXbins{kk,jj}] = histcounts(ducomp(~isnan(dXcomp)),'Normalization','pdf');
-            dXstd(kk,jj) = std(ducomp(~isnan(dXcomp)));
-        end
-
+        jj/maxLen
     end
 
-    % two particle dispersion
+    % two particle dispersion TODO
 
         
     % put it in the struct
@@ -136,6 +148,7 @@ for ii = 1:length(h)
     stats(ii).Sbins = Sbins;
     stats(ii).nSamps = nSamps;
     stats(ii).F = F;
+    stats(ii).F_ci = F_ci;
     stats(ii).uf = var(up,0,[2 3],'omitnan');
     stats(ii).dXpdf = dXpdf;
     stats(ii).dXbins = dXbins;
