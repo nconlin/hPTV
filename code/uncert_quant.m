@@ -3,20 +3,20 @@
 %% grab some data
 
 % camera calibration data
-calibFile_easyWnd = 'D:\utah_trip_data\9-28-2022\cal_synch_easyWandData.mat';
-calibFile_coeffs = 'D:\utah_trip_data\9-28-2022\cal_synch_dltCoefs.csv';
+calibFile_easyWnd = 'E:\island_beach\10_9a\axis_cal_easyWandData.mat';
+calibFile_coeffs = 'E:\island_beach\10_9a\axis_cal_dltCoefs.csv';
 DLTcoeffs = load(calibFile_coeffs);
 
 % camera position data
-centerFiles = {'cam1_track_centers_off.mat','cam2_track_centers_off.mat','cam3_track_centers_off.mat','cam4_track_centers_off.mat'};
+centerFiles = {'cam1_centers_off_new.mat','cam2_centers_off_new.mat','cam3_centers_off_new.mat','cam4_centers_off_new.mat'};
 for ii = 1:length(centerFiles)
     load(centerFiles{ii});
     CCall{ii} = CC;
 end
 
 % world position data
-stmFile = 'rays_many_out_cpp.h5';
-frames = 1:300;
+stmFile = 'rays_new_out_cpp.h5';
+frames = 5;
 [X,T,E] = readSTM(stmFile,frames);
 matchIDs = readSTMmatches(stmFile,frames);
 

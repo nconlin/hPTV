@@ -1,5 +1,5 @@
 function matches = readSTMmatches(file,frames)
-% read data from running c version of stm 
+% read data from running c version of stm with particle ids
 nCam = 4;
 
 if numel(frames) == 1
@@ -9,6 +9,7 @@ elseif numel(frames) == 2
 end
 nframes = length(frames);
 matches = cell(nframes,1);
+nd = NaN(nframes,1);
 
 for ii = 1:nframes
 
@@ -19,6 +20,7 @@ for ii = 1:nframes
         data = h5read(file,dataPath);
         
         % assign cam1-4 ray ids
+        nd(ii) = size(data,1);
         matchnow = NaN(size(data,1),nCam);
         for jj = 1:size(data,1) % loop over particles in this frame
     
@@ -47,8 +49,20 @@ for ii = 1:nframes
         matches{ii} = matchnow;
     catch
         warning(['read failed at frame ' num2str(frames(ii))]);
+        % just return successful frames
+        matches_all = matches;
+        matches = cell(ii-1,1);
+        for pp = 1:(ii-1)
+            matches{pp} = matches_all{pp};
+        end
         return
     end
+end
 
+% just return successful frames
+matches_all = matches;
+matches = cell(ii,1);
+for pp = 1:ii
+    matches{pp} = matches_all{pp};
 end
 

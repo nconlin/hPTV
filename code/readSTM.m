@@ -18,7 +18,7 @@ bufStart = 1;
 X = []; T = []; E = []; % output variables
 for ii = 1:nframes
 
-    % read in data for this frame
+    %% read in data for this frame
     dataPath = ['/frame' num2str(frames(ii)) '_xyze'];
     try
         % grab data and check size
@@ -35,10 +35,10 @@ for ii = 1:nframes
         T = [T; Tbuf(bufInds);];
         E = [E; Ebuf(bufInds);];
         return; % all done
-        
+
     end
 
-    % deal with the data
+    %% deal with the data
     if bufEnd > bufSize % buffer size exceeded
 
         % put the data in the output arrays

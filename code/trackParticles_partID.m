@@ -27,8 +27,8 @@ kinPredict = 1; % flag for kinematic prediction
 
 % check for bad input data
 badInds = isnan(X(:,1)) | isnan(X(:,2)) | isnan(T);
-if ~isempty(badInds)
-    warning('Nans found in input data... pruning')
+if sum(badInds) > 0
+    error('Nans found in input data... sort out matchIDs to proceed')
 end
 X(badInds,:) = [];
 T(badInds) = [];
@@ -55,7 +55,7 @@ for k = 1:nFrames
     if Np > 0
 
         x = X(nowInds,:); % get this frames positions
-        partIDs = matchIDs(nowInds,:);
+        partIDs = matchIDs{k};
         
         if k == 1 && predictFirstFrame % use 3 frame initialization
 
